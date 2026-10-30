@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nöbet Alarmı</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#EEF1EC;--card:#FFFFFF;--ink:#1D2B2A;--mute:#5E6E6B;--line:#D5DCD6;--c2:#4B4FA3;--c3:#8FA39A;--btn:#1D2B2A;--btnt:#FFFFFF;--sel:#E1E8E3;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121A19;--card:#1B2625;--ink:#E8EFEA;--mute:#9BAAA6;--line:#2C3A38;--c2:#8E92E8;--c3:#6F8780;--btn:#E8EFEA;--btnt:#121A19;--sel:#243230}}
+:root[data-theme="dark"]{--bg:#121A19;--card:#1B2625;--ink:#E8EFEA;--mute:#9BAAA6;--line:#2C3A38;--c2:#8E92E8;--c3:#6F8780;--btn:#E8EFEA;--btnt:#121A19;--sel:#243230}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 Figtree,system-ui,sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px 16px 110px}
+h1{font-size:26px;font-weight:800;margin:6px 0 14px}
+h2{font-size:18px;font-weight:800;margin:0 0 4px}
+p.s{color:var(--mute);margin:0 0 12px;font-size:14px}
+section{background:var(--card);border-radius:16px;padding:16px;margin:0 0 14px;border:1px solid var(--line)}
+section[hidden]{display:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+input[type=text]{flex:1;min-width:0;font-weight:600}
+input[type=number]{width:70px}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:9px 14px;min-height:42px;background:var(--btn);color:var(--btnt);cursor:pointer}
+button.g{background:transparent;color:var(--mute);border:1px solid var(--line);padding:9px 12px}
+.dot{width:14px;height:14px;border-radius:50%;flex:none}
+.type{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.type:first-of-type{border:0;margin-top:0;padding-top:0}
+.banner{background:var(--sel);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:14px}
+.day{border-top:1px solid var(--line)}
+.day:first-of-type{border:0}
+.dayb{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;color:var(--ink);border-radius:0;padding:11px 0;min-height:56px;font-weight:400}
+.dayb .d{width:84px;flex:none;font-size:14px;color:var(--mute)}
+.dayb .d b{display:block;color:var(--ink);font-size:15px}
+.dayb .mid{flex:1;min-width:0}
+.dayb .tag{font-weight:800;font-size:15px}
+.dayb .t{font-size:14px;color:var(--mute)}
+.edit{background:var(--bg);border-radius:12px;padding:10px 12px;margin:0 0 10px}
+.edit label{display:block;font-size:13px;color:var(--mute);margin:6px 0 4px}
+.edit select{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:999px;padding:0 4px 0 12px}
+.chip button{min-height:34px;padding:0 10px;border:0}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:transparent;color:var(--mute);border-radius:12px;min-height:52px;font-size:15px}
+nav button[aria-current="page"]{background:var(--sel);color:var(--ink);font-weight:800}
+:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+<h1 id="title"></h1>
+
+<section id="p-takvim">
+<div id="cal"></div>
+</section>
+
+<div id="p-dongu" hidden>
+<section>
+<h2>Vardiya tipleri</h2>
+<p class="s">Her tipe istediğin kadar alarm saati ekle. Alarm istemiyorsan boş bırak.</p>
+<div id="types"></div>
+<button class="g" id="addType">Vardiya tipi ekle</button>
+</section>
+<section>
+<h2>Döngü</h2>
+<p class="s">Sırayla kaç gün hangi vardiya olduğunu yaz. Döngü bitince başa döner.</p>
+<div id="cycle"></div>
+<div class="row"><button class="g" id="addSeg">Parça ekle</button><span class="s" id="total" style="margin:0"></span></div>
+</section>
+<section>
+<h2>Başlangıç</h2>
+<p class="s">Döngünün 1. günü hangi tarih?</p>
+<input type="date" id="start">
+</section>
+</div>
+
+<section id="p-izin" hidden>
+<h2>İzin / Duraklat</h2>
+<div id="pause"></div>
+</section>
+</main>
+
+<nav aria-label="Bölümler">
+<button data-tab="takvim">Takvim</button>
+<button data-tab="dongu">Döngü</button>
+<button data-tab="izin">İzin</button>
+</nav>
+
+<script>
+var COLORS=["#E3A72F","#4B4FA3","#8FA39A","#C4562F","#2E8B7A","#A23B72"];
+var TITLES={takvim:"Önümüzdeki 30 gün",dongu:"Döngü",izin:"İzin"};
+var tab="takvim",openDay=null;
+var state={types:[
+{id:1,name:"Sabah",color:COLORS[0],times:["07:15","07:20","07:30"]},
+{id:2,name:"Akşam",color:COLORS[1],times:["19:15","19:20","19:30"]},
+{id:3,name:"Dinlenme",color:COLORS[2],times:[]}],
+cycle:[{t:1,d:2},{t:2,d:2},{t:3,d:2}],start:iso(new Date()),ov:{},ex:{},paused:false,until:null};
+try{var s0=localStorage.getItem("nobet");if(s0){var o0=JSON.parse(s0);for(var k0 in o0)state[k0]=o0[k0]}}catch(e){}
+function save(){try{localStorage.setItem("nobet",JSON.stringify(state))}catch(e){}}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function dn(str){var p=str.split("-");return Date.UTC(+p[0],+p[1]-1,+p[2])/86400000}
+function typeOf(id){return state.types.find(function(x){return x.id===id})}
+function total(){return state.cycle.reduce(function(a,c){return a+c.d},0)}
+function forDate(str){
+var o=state.ov[str];if(o){var ot=typeOf(o);if(ot)return ot}
+var T=total();if(!T)return null;
+var pos=(((dn(str)-dn(state.start))%T)+T)%T;
+for(var i=0;i<state.cycle.length;i++){var c=state.cycle[i];if(pos<c.d)return typeOf(c.t);pos-=c.d}
+return null}
+function isPaused(str){if(!state.paused)return false;if(!state.until)return true;return str<state.until}
+function dayInfo(str){var t=forDate(str),p=isPaused(str);
+return{t:t,paused:p,cyc:(!p&&t)?t.times.slice().sort():[],ex:(state.ex[str]||[]).slice().sort()}}
+function timesText(i){var a=i.cyc.concat(i.ex.map(function(x){return x+" (ekstra)"}));return a.length?a.join("  "):"Alarm yok"}
+function nameOf(i){return i.paused?"Duraklatıldı":(i.t?i.t.name:"-")}
+function fmt(str,long){var p=str.split("-");var d=new Date(+p[0],+p[1]-1,+p[2]);
+return d.toLocaleDateString("tr-TR",long?{weekday:"long",day:"numeric",month:"long"}:{weekday:"short",day:"numeric",month:"short"})}
+function addDays(str,n){var p=str.split("-");return iso(new Date(+p[0],+p[1]-1,+p[2]+n))}
+function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+function render(){
+var today=iso(new Date()),tom=addDays(today,1),h;
+if(state.paused&&state.until&&!isPaused(today)){state.paused=false;state.until=null}
+
+["takvim","dongu","izin"].forEach(function(t){document.getElementById("p-"+t).hidden=(t!==tab)});
+document.querySelectorAll("nav button").forEach(function(b){if(b.dataset.tab===tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+document.getElementById("title").textContent=TITLES[tab];
+
+h="";
+if(state.paused){h+='<div class="banner">'+(state.until?"Döngü duraklatıldı, dönüş: "+fmt(state.until):"Döngü süresiz duraklatıldı")+'. Ekstra alarmlar çalmaya devam eder.</div>'}
+for(var k=0;k<30;k++){var d=addDays(today,k),i2=dayInfo(d);
+var lab=k===0?"Bugün":(k===1?"Yarın":"");
+var p=fmt(d).split(" ");
+h+='<div class="day"><button class="dayb" data-open="'+d+'" aria-expanded="'+(openDay===d)+'"><span class="d">'+(lab?"<b>"+lab+"</b>":"")+fmt(d)+'</span><span class="dot" style="background:'+(i2.t&&!i2.paused?i2.t.color:"var(--c3)")+'"></span><span class="mid"><span class="tag">'+esc(nameOf(i2))+(state.ov[d]?" (elle)":"")+'</span><br><span class="t">'+timesText(i2)+'</span></span></button>';
+if(openDay===d){
+var op='<option value="">Döngüye göre</option>';
+state.types.forEach(function(x){op+='<option value="'+x.id+'"'+(state.ov[d]===x.id?" selected":"")+'>'+esc(x.name)+'</option>'});
+h+='<div class="edit"><label for="ov">Bu günün vardiyası</label><select id="ov" data-ov="'+d+'">'+op+'</select><label for="xa">Ekstra alarm ekle</label><div class="chips">';
+i2.ex.forEach(function(x){h+='<span class="chip">'+x+'<button class="g" data-delx="'+d+'|'+x+'" aria-label="Ekstra alarmı sil">×</button></span>'});
+h+='<input type="time" id="xa" data-xadd="'+d+'"></div></div>'}
+h+='</div>'}
+document.getElementById("cal").innerHTML=h;
+
+if(state.paused){
+h='<p class="s">'+(state.until?"Dönüş tarihi: "+fmt(state.until,true)+". O gün döngü otomatik devam eder.":"Süresiz duraklatıldı. Döngü alarmları kurulmuyor.")+'</p><div class="row"><button data-resume="takvim">Takvime göre devam et</button><button class="g" data-resume="bugun">Bugünü 1. gün yap</button></div>'}
+else{
+h='<p class="s">Açınca döngü alarmları durur. Ekstra alarmlar çalmaya devam eder.</p><div class="row"><input type="date" id="until" min="'+tom+'" aria-label="Dönüş tarihi"><button id="pauseBtn">Duraklat</button></div><p class="s" style="margin:0">Dönüş tarihini boş bırakırsan süresiz duraklar.</p>'}
+document.getElementById("pause").innerHTML=h;
+
+h="";
+state.types.forEach(function(t,i){
+h+='<div class="type"><div class="row"><span class="dot" style="background:'+t.color+'"></span>'+
+'<input type="text" value="'+esc(t.name)+'" aria-label="Vardiya adı" data-n="'+i+'">'+
+'<button class="g" data-deltype="'+i+'">Sil</button></div><div class="row">';
+t.times.forEach(function(x,j){
+h+='<span class="row" style="margin:0;gap:2px"><input type="time" value="'+x+'" data-time="'+i+','+j+'"><button class="g" data-deltime="'+i+','+j+'" aria-label="Saati sil">×</button></span>'});
+h+='<button class="g" data-addtime="'+i+'">Alarm saati ekle</button></div></div>'});
+document.getElementById("types").innerHTML=h;
+
+h="";
+state.cycle.forEach(function(c,i){
+h+='<div class="row"><select data-segt="'+i+'" aria-label="Vardiya">';
+state.types.forEach(function(t){h+='<option value="'+t.id+'"'+(t.id===c.t?" selected":"")+'>'+esc(t.name)+'</option>'});
+h+='</select><input type="number" min="1" max="60" value="'+c.d+'" data-segd="'+i+'" aria-label="Gün sayısı"><span>gün</span><button class="g" data-delseg="'+i+'">Sil</button></div>'});
+document.getElementById("cycle").innerHTML=h;
+document.getElementById("total").textContent="Döngü toplam "+total()+" gün";
+document.getElementById("start").value=state.start;
+save()}
+
+document.addEventListener("click",function(e){
+var b=e.target.closest("button");if(!b)return;var d=b.dataset,a;
+if(d.tab!==undefined){tab=d.tab;window.scrollTo(0,0)}
+else if(d.open!==undefined){openDay=(openDay===d.open)?null:d.open}
+else if(b.id==="addType"){state.types.push({id:Date.now(),name:"Yeni vardiya",color:COLORS[state.types.length%COLORS.length],times:[]})}
+else if(b.id==="addSeg"){if(!state.types.length)return;state.cycle.push({t:state.types[0].id,d:1})}
+else if(b.id==="pauseBtn"){state.paused=true;state.until=document.getElementById("until").value||null}
+else if(d.resume!==undefined){if(d.resume==="bugun")state.start=iso(new Date());state.paused=false;state.until=null}
+else if(d.delx!==undefined){a=d.delx.split("|");var l=state.ex[a[0]]||[];l.splice(l.indexOf(a[1]),1);if(!l.length)delete state.ex[a[0]]}
+else if(d.deltype!==undefined){var i=+d.deltype,id2=state.types[i].id;state.types.splice(i,1);state.cycle=state.cycle.filter(function(c){return c.t!==id2})}
+else if(d.addtime!==undefined){state.types[+d.addtime].times.push("07:00")}
+else if(d.deltime!==undefined){a=d.deltime.split(",");state.types[+a[0]].times.splice(+a[1],1)}
+else if(d.delseg!==undefined){state.cycle.splice(+d.delseg,1)}
+else return;
+render()});
+
+document.addEventListener("change",function(e){
+var el=e.target,d=el.dataset,a;
+if(d.n!==undefined)state.types[+d.n].name=el.value||"Vardiya";
+else if(d.time!==undefined){a=d.time.split(",");if(el.value)state.types[+a[0]].times[+a[1]]=el.value}
+else if(d.segt!==undefined)state.cycle[+d.segt].t=+el.value;
+else if(d.segd!==undefined)state.cycle[+d.segd].d=Math.max(1,Math.min(60,parseInt(el.value)||1));
+else if(d.ov!==undefined){if(el.value)state.ov[d.ov]=+el.value;else delete state.ov[d.ov]}
+else if(d.xadd!==undefined){if(!el.value)return;var l2=state.ex[d.xadd]||(state.ex[d.xadd]=[]);if(l2.indexOf(el.value)<0)l2.push(el.value)}
+else if(el.id==="start"){if(el.value)state.start=el.value}
+else return;
+render()});
+render();
+</script>
+</body>
+</html>
