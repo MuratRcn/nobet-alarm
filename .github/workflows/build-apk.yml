@@ -1,0 +1,42 @@
+name: APK derle
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Android klasörü yoksa oluştur
+        run: |
+          if [ ! -d android ]; then flutter create . --platforms=android; fi
+      - name: Android ayarları (minSdk ve izinler)
+        run: |
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/' android/app/build.gradle.kts || true
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/' android/app/build.gradle || true
+          python3 - <<'PY'
+          p='android/app/src/main/AndroidManifest.xml'
+          s=open(p,encoding='utf-8').read()
+          izinler=["POST_NOTIFICATIONS","SCHEDULE_EXACT_ALARM","USE_EXACT_ALARM","RECEIVE_BOOT_COMPLETED","VIBRATE","WAKE_LOCK","USE_FULL_SCREEN_INTENT","REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"]
+          ekle=""
+          for i in izinler:
+              if i not in s:
+                  ekle+='    <uses-permission android:name="android.permission.%s"/>\n' % i
+          s=s.replace("<application", ekle+"    <application", 1)
+          open(p,'w',encoding='utf-8').write(s)
+          PY
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nobet-alarm-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
