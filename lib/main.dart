@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +21,23 @@ void main() async {
   runApp(MaterialApp(
     navigatorKey: navKey,
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF2E8B7A)),
+    // Türkçe arayüz (tarih/saat seçici dahil)
+    locale: const Locale('tr', 'TR'),
+    supportedLocales: const [Locale('tr', 'TR')],
+    localizationsDelegates: const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    // Koyu tema
+    themeMode: ThemeMode.dark,
+    darkTheme: ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorSchemeSeed: const Color(0xFF2E8B7A),
+      scaffoldBackgroundColor: const Color(0xFF121A19),
+    ),
+    theme: ThemeData(useMaterial3: true, brightness: Brightness.dark, colorSchemeSeed: const Color(0xFF2E8B7A)),
     home: const Home(),
   ));
 }
@@ -227,7 +244,7 @@ class _HomeState extends State<Home> {
             assetAudioPath: 'assets/alarm.wav',
             loopAudio: true,
             vibrate: true,
-            volume: 0.8,
+            volume: 1.0,
             androidFullScreenIntent: true,
             notificationSettings: NotificationSettings(
               title: it.$3,
